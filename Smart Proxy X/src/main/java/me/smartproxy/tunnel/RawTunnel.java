@@ -1,5 +1,7 @@
 package me.smartproxy.tunnel;
 
+import android.util.Log;
+
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
@@ -7,7 +9,9 @@ import java.nio.channels.SocketChannel;
 
 public class RawTunnel extends Tunnel {
 
-	public RawTunnel(InetSocketAddress serverAddress,Selector selector) throws Exception{
+	private static final String TAG = RawTunnel.class.getSimpleName();
+
+	public RawTunnel(InetSocketAddress serverAddress, Selector selector) throws Exception{
 		super(serverAddress,selector);
 	}
 	
@@ -19,18 +23,20 @@ public class RawTunnel extends Tunnel {
 	@Override
 	protected void onConnected(ByteBuffer buffer) throws Exception {
 		onTunnelEstablished();
+		Log.d(TAG,"onConnected:"+new String(buffer.array()));
 	}
 
 	@Override
 	protected void beforeSend(ByteBuffer buffer) throws Exception {
 		// TODO Auto-generated method stub
+		Log.d(TAG,"beforeSend:"+new String(buffer.array()));
 		
 	}
 
 	@Override
 	protected void afterReceived(ByteBuffer buffer) throws Exception {
 		// TODO Auto-generated method stub
-		
+		Log.d(TAG,"afterReceived:"+new String(buffer.array()));
 	}
 
 	@Override

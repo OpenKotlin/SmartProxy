@@ -1,6 +1,13 @@
 package me.smartproxy.core;
 
 import android.annotation.SuppressLint;
+import android.os.Build;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 
 import java.io.FileInputStream;
 import java.net.InetAddress;
@@ -10,6 +17,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import me.smartproxy.tcpip.CommonMethods;
 import me.smartproxy.tunnel.Config;
@@ -157,10 +166,10 @@ public class ProxyConfig {
 	}
 
 	public String getSessionName(){
-//		if(m_session_name==null){
-//			m_session_name=getDefaultProxy().ServerAddress.getHostName();
-//		}
-		return "m.baidu.com";
+		if(m_session_name==null){
+			m_session_name=getDefaultProxy().ServerAddress.getHostName();
+		}
+		return m_session_name;
 	}
 
 	public String getUserAgent(){
@@ -219,52 +228,18 @@ public class ProxyConfig {
 
 	private String[] downloadConfig(String url) throws Exception{
 		try {
-//			HttpClient client=new DefaultHttpClient();
-//			HttpGet requestGet=new HttpGet(url);
-//
-//			requestGet.addHeader("X-Android-MODEL", Build.MODEL);
-//			requestGet.addHeader("X-Android-SDK_INT",Integer.toString(Build.VERSION.SDK_INT));
-//			requestGet.addHeader("X-Android-RELEASE", Build.VERSION.RELEASE);
-//			requestGet.addHeader("X-App-Version", AppVersion);
-//			requestGet.addHeader("X-App-Install-ID", AppInstallID);
-//			requestGet.setHeader("User-Agent", System.getProperty("http.agent"));
-//			HttpResponse response=client.execute(requestGet);
+			HttpClient client=new DefaultHttpClient();
+			HttpGet requestGet=new HttpGet(url);
 
-			String configString="// http://pac.itzmx.com\n" +
-					"\n" +
-					"var proxy = \"PROXY server01.pac.itzmx.com:25;\";\n" +
-					"\n" +
-					"var domains = {\n" +
-					"  \"m.baidu.com\": 1, \n" +
-					"  \"baidu.com\": 1\n" +
-					"};\n" +
-					"\n" +
-					"var direct = 'DIRECT;';\n" +
-					"\n" +
-					"var hasOwnProperty = Object.hasOwnProperty;\n" +
-					"\n" +
-					"function FindProxyForURL(url, host) {\n" +
-					"    if (host == \"www.so.com\") {\n" +
-					"        return \"PROXY 360.itzmx.com:80\";\n" +
-					"    }\n" +
-					"\n" +
-					"    var suffix;\n" +
-					"    var pos = host.lastIndexOf('.');\n" +
-					"    while(1) {\n" +
-					"        suffix = host.substring(pos + 1);\n" +
-					"        if (suffix == \"360.cn\")\n" +
-					"            if (url.indexOf('http://') == 0)\n" +
-					"                return \"PROXY 360.itzmx.com:80\";\n" +
-					"        if (hasOwnProperty.call(domains, suffix)) {\n" +
-					"            return proxy;\n" +
-					"        }\n" +
-					"        if (pos <= 0) {\n" +
-					"            break;\n" +
-					"        }\n" +
-					"        pos = host.lastIndexOf('.', pos - 1);\n" +
-					"    }\n" +
-					"    return direct;\n" +
-					"}";//EntityUtils.toString(response.getEntity(),"UTF-8");
+			requestGet.addHeader("X-Android-MODEL", Build.MODEL);
+			requestGet.addHeader("X-Android-SDK_INT",Integer.toString(Build.VERSION.SDK_INT));
+			requestGet.addHeader("X-Android-RELEASE", Build.VERSION.RELEASE);
+			requestGet.addHeader("X-App-Version", AppVersion);
+			requestGet.addHeader("X-App-Install-ID", AppInstallID);
+			requestGet.setHeader("User-Agent", System.getProperty("http.agent"));
+			HttpResponse response=client.execute(requestGet);
+
+			String configString=EntityUtils.toString(response.getEntity(),"UTF-8");
 			String[] lines=configString.split("\\n");
 			return lines;
 		}
@@ -365,18 +340,18 @@ public class ProxyConfig {
 	}
 
 	private void tryAddProxy(String[] lines){
-//		for (String line : lines) {
-//			Pattern p=Pattern.compile("proxy\\s+([^:]+):(\\d+)",Pattern.CASE_INSENSITIVE);
-//			Matcher m=p.matcher(line);
-//			while(m.find()){
+		for (String line : lines) {
+			Pattern p=Pattern.compile("proxy\\s+([^:]+):(\\d+)",Pattern.CASE_INSENSITIVE);
+			Matcher m=p.matcher(line);
+			while(m.find()){
 				HttpConnectConfig config=new HttpConnectConfig();
-//				config.ServerAddress= new InetSocketAddress("192.168.1.2", 8089);
+				config.ServerAddress= new InetSocketAddress(m.group(1), Integer.parseInt(m.group(2)));
 				if(!m_ProxyList.contains(config)){
 					m_ProxyList.add(config);
-					m_DomainMap.put("m.baidu.com", true);
+					m_DomainMap.put(config.ServerAddress.getHostName(), false);
 				}
-//			}
-//		}
+			}
+		}
 	}
 
 	private void addProxyToList(String[] items,int offset) throws Exception{
