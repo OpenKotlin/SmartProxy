@@ -19,11 +19,17 @@ public class HttpConnectTunnel extends Tunnel {
 
 	@Override
 	protected void onConnected(ByteBuffer buffer) throws Exception {
-		String request = String.format("CONNECT %s:%d HTTP/1.0\r\nProxy-Connection: keep-alive\r\nUser-Agent: %s\r\nX-App-Install-ID: %s\r\n\r\n",
+		String request = String.format("CONNECT %s:%d HTTP/1.0\r\nProxy-Authorization: Basic Y29ubmVjdF9wbHVzOjU1NTU1\r\nProxy-Connection: keep-alive\r\nUser-Agent: %s\r\nX-App-Install-ID: %s\r\n\r\n",
 				m_DestAddress.getHostName(),
 				m_DestAddress.getPort(),
 				ProxyConfig.Instance.getUserAgent(),
 				ProxyConfig.AppInstallID);
+
+//		String request = String.format("CONNECT %s:%d HTTP/1.0\r\nProxy-Connection: keep-alive\r\nUser-Agent: %s\r\nX-App-Install-ID: %s\r\n\r\n",
+//				m_DestAddress.getHostName(),
+//				m_DestAddress.getPort(),
+//				ProxyConfig.Instance.getUserAgent(),
+//				ProxyConfig.AppInstallID);
 
 		buffer.clear();
 		buffer.put(request.getBytes());

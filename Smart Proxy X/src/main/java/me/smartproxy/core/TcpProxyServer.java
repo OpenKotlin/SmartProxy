@@ -101,9 +101,9 @@ public class TcpProxyServer implements Runnable {
 			if(ProxyConfig.Instance.needProxy(session.RemoteHost, session.RemoteIP)){
 				if(ProxyConfig.IS_DEBUG)
 					System.out.printf("%d/%d:[PROXY] %s=>%s:%d\n",NatSessionManager.getSessionCount(), Tunnel.SessionCount,session.RemoteHost,CommonMethods.ipIntToString(session.RemoteIP),session.RemotePort&0xFFFF);
-				return InetSocketAddress.createUnresolved(session.RemoteHost, session.RemotePort&0xFFFF);
+				return InetSocketAddress.createUnresolved("192.168.1.2", 8089&0xFFFF);
 			}else {
-				return new InetSocketAddress(localChannel.socket().getInetAddress(),session.RemotePort&0xFFFF);
+				return new InetSocketAddress("192.168.1.2", 8089&0xFFFF);
 			}
 		}
 		return null;
@@ -116,6 +116,7 @@ public class TcpProxyServer implements Runnable {
 			localTunnel=TunnelFactory.wrap(localChannel, m_Selector);
 
 			InetSocketAddress destAddress=getDestAddress(localChannel);
+//			InetSocketAddress destAddress=new InetSocketAddress("192.168.1.2",8089);
 			if(destAddress!=null){
 				Tunnel remoteTunnel=TunnelFactory.createTunnelByConfig(destAddress,m_Selector);
 				remoteTunnel.setBrotherTunnel(localTunnel);//关联兄弟

@@ -19,17 +19,17 @@ public class TunnelFactory {
 	}
  
 	public static Tunnel createTunnelByConfig(InetSocketAddress destAddress,Selector selector) throws Exception {
-		if(destAddress.isUnresolved()){
+//		if(destAddress.isUnresolved()){
 			Config config=ProxyConfig.Instance.getDefaultTunnelConfig(destAddress);
 			if(config instanceof HttpConnectConfig){
 				return new HttpConnectTunnel((HttpConnectConfig)config,selector);
 			}else if(config instanceof ShadowsocksConfig){
-				return new ShadowsocksTunnel((ShadowsocksConfig)config,selector); 
-			} 
+				return new ShadowsocksTunnel((ShadowsocksConfig)config,selector);
+			}
 			throw new Exception("The config is unknow.");
-		}else {
-			return new RawTunnel(destAddress, selector);
-		}
+//		}else {
+//			return new RawTunnel(destAddress, selector);
+//		}
 	}
 
 }
