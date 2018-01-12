@@ -1,5 +1,7 @@
 package me.smartproxy.core;
 
+import android.util.Log;
+
 import java.net.InetSocketAddress;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
@@ -13,15 +15,18 @@ import me.smartproxy.tunnel.shadowsocks.ShadowsocksConfig;
 import me.smartproxy.tunnel.shadowsocks.ShadowsocksTunnel;
 
 public class TunnelFactory {
-	
-	public static Tunnel wrap(SocketChannel channel,Selector selector){
+
+	private static final String TAG = TunnelFactory.class.getSimpleName();
+
+	public static Tunnel wrap(SocketChannel channel, Selector selector){
 		return new RawTunnel(channel, selector);
 	}
  
 	public static Tunnel createTunnelByConfig(InetSocketAddress destAddress,Selector selector) throws Exception {
 		if(destAddress.isUnresolved()){
 			Config config=ProxyConfig.Instance.getDefaultTunnelConfig(destAddress);
-			if(config instanceof HttpConnectConfig){
+			if( config instanceof HttpConnectConfig){
+				Log.d(TAG,"current proxy dst ip:"+config.ServerAddress);
 				return new HttpConnectTunnel((HttpConnectConfig)config,selector);
 			}else if(config instanceof ShadowsocksConfig){
 				return new ShadowsocksTunnel((ShadowsocksConfig)config,selector);

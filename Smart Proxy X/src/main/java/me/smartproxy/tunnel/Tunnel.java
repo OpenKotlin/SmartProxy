@@ -1,6 +1,7 @@
 package me.smartproxy.tunnel;
 
 import android.annotation.SuppressLint;
+import android.util.Log;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -15,6 +16,7 @@ import me.smartproxy.core.ProxyConfig;
 public abstract class Tunnel {
 
 	final static ByteBuffer GL_BUFFER=ByteBuffer.allocate(20000);
+	private static final String TAG = Tunnel.class.getSimpleName();
 	public static long SessionCount;
 
 	protected abstract void onConnected(ByteBuffer buffer) throws Exception;
@@ -30,6 +32,11 @@ public abstract class Tunnel {
 	private boolean m_Disposed;
 	private InetSocketAddress m_ServerEP;
 	protected InetSocketAddress m_DestAddress;
+
+	// TODO : test
+	public InetSocketAddress getDstIp(){
+		return m_ServerEP;
+	}
 
 	public Tunnel(SocketChannel innerChannel,Selector selector){
 		this.m_InnerChannel=innerChannel;
@@ -54,6 +61,7 @@ public abstract class Tunnel {
 		if(LocalVpnService.Instance.protect(m_InnerChannel.socket())){//保护socket不走vpn
 			m_DestAddress=destAddress;
 			m_InnerChannel.register(m_Selector, SelectionKey.OP_CONNECT,this);//注册连接事件
+			Log.d(TAG,"current real connect ip:"+m_ServerEP+"    dst:"+destAddress+ "   m_InnerChannel:"+m_InnerChannel);
 			m_InnerChannel.connect(m_ServerEP);//连接目标
 		}else {
 			throw new Exception("VPN protect socket failed.");
@@ -97,6 +105,7 @@ public abstract class Tunnel {
 
 	protected void onTunnelEstablished() throws Exception{
 		this.beginReceive();//开始接收数据
+		// TODO : Hook response
 		m_BrotherTunnel.beginReceive();//兄弟也开始收数据吧
 	}
 
